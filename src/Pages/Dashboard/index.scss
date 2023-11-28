@@ -1,0 +1,25 @@
+.dashboard {
+  margin: 15px;
+  h1 {
+    margin-left: 15px;
+  }
+
+  color: white;
+}
+
+.big-numbers-header {
+  display: flex;
+  justify-content: space-around;
+
+  .info-card {
+    margin: 15px;
+  }
+}
+
+.graph-container {
+  display: flex;
+
+  .info-card {
+    margin: 15px;
+  }
+}

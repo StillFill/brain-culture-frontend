@@ -1,0 +1,13 @@
+.info-card {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05), 0 6px 6px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: #232323;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}

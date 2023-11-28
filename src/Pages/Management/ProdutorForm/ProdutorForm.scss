@@ -1,0 +1,47 @@
+.produtor-form {
+  h3 {
+    margin-top: 30px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    padding-bottom: 5px;
+  }
+}
+
+.produtor-form-container {
+  display: flex;
+
+  .input-form-container {
+    width: 100%;
+  }
+
+  margin-bottom: 15px;
+}
+
+.produtor-form-inputs {
+  margin: 0 15px;
+}
+
+.input-form-container {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+
+  label {
+    margin-top: 15px;
+    margin-bottom: 5px;
+  }
+}
+
+.header-buttons {
+  display: flex;
+  justify-content: end;
+}
+
+.produtor-form-footer {
+  display: flex;
+  justify-content: end;
+  margin-top: 30px;
+}
+
+.produtor-form-submit-button {
+  margin-left: 15px;
+}

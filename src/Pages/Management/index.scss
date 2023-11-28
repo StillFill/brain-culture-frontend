@@ -1,0 +1,18 @@
+.management {
+  color: white;
+  margin: 30px;
+  overflow: auto;
+}
+
+.management-table {
+  margin-top: 15px;
+}
+
+.management-headers-button {
+  display: flex;
+  justify-content: end;
+
+  button {
+    font-size: 15px;
+  }
+}

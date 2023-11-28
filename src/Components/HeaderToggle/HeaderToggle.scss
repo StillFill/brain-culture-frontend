@@ -1,0 +1,31 @@
+.header-toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  opacity: 0.8;
+
+  button {
+    border: 0;
+
+    background-color: #232323;
+    color: white;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 5px 15px;
+
+    &:first-child {
+      border-radius: 8px 0 0 8px;
+    }
+
+    &:last-child {
+      border-radius: 0 8px 8px 0;
+    }
+
+    &.active {
+      background-color: white;
+      color: black;
+      opacity: 1;
+    }
+  }
+}
