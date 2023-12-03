@@ -34,6 +34,10 @@
 .header-buttons {
   display: flex;
   justify-content: end;
+
+  button {
+    margin: 0 5px;
+  }
 }
 
 .produtor-form-footer {
@@ -44,4 +48,9 @@
 
 .produtor-form-submit-button {
   margin-left: 15px;
+}
+
+.error-message {
+  font-size: 0.8em;
+  color: red;
 }

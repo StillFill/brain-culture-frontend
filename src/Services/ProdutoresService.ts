@@ -1,5 +1,7 @@
 import axios from "axios";
 import environments from "../Environments/Environments.local";
+import { ICultura } from "./CulturasService";
+import { IProdutorForm } from "../Pages/Management/ProdutorForm/ProdutorForm";
 
 export const getProdutores = async (): Promise<IProdutor[]> => {
   try {
@@ -7,56 +9,52 @@ export const getProdutores = async (): Promise<IProdutor[]> => {
     return res.data;
   } catch (err: any) {
     console.error(err.message);
-    throw new Error("Erro ao buscar quantidade de fazendas");
-  }
-};
-
-export const getProdutorByDocumento = async (
-  documento: string
-): Promise<IProdutor> => {
-  try {
-    const res = await axios.get<IProdutor>(
-      environments.produtores_uri + "/documento/" + documento
-    );
-    return res.data;
-  } catch (err: any) {
-    console.error(err.message);
-    throw new Error("Erro ao buscar quantidade de fazendas");
+    throw new Error("Erro ao buscar produtores");
   }
 };
 
 export const addProdutor = async ({
   documento,
+  culturas_selection,
   ...produtor
-}: IProdutor): Promise<IProdutor> => {
+}: IProdutorForm): Promise<void> => {
   try {
-    const res = await axios.post<IProdutor>(environments.produtores_uri, {
+    await axios.post<IProdutor>(environments.produtores_uri, {
       ...produtor,
       documento_produtor: documento,
+      culturas: culturas_selection.map((a) => a.value),
     });
-
-    return res.data;
   } catch (err: any) {
     console.error(err.message);
-    throw new Error("Erro ao buscar quantidade de fazendas");
+    throw new Error("Erro ao adicionar produtor");
   }
 };
 
 export const updateProdutor = async ({
   documento,
+  culturas_selection,
   ...produtor
-}: IProdutor): Promise<IProdutor> => {
+}: IProdutorForm): Promise<void> => {
   try {
-    console.log("PRODUTOOOOR:", produtor);
-    const res = await axios.put<IProdutor>(environments.produtores_uri, {
+    await axios.put<IProdutor>(environments.produtores_uri, {
       ...produtor,
       documento_produtor: documento,
+      culturas: culturas_selection.map((a) => a.value),
     });
-
-    return res.data;
   } catch (err: any) {
     console.error(err.message);
-    throw new Error("Erro ao buscar quantidade de fazendas");
+    throw new Error("Erro ao atualizar produtor");
+  }
+};
+
+export const deleteProdutor = async (documento: string) => {
+  try {
+    return axios.delete<IProdutor>(
+      environments.produtores_uri + "/" + documento
+    );
+  } catch (err: any) {
+    console.error(err.message);
+    throw new Error("Erro ao deletar produtor");
   }
 };
 
@@ -69,10 +67,5 @@ export interface IProdutor {
   area_total_fazenda: number;
   area_agricultavel_fazenda: number;
   area_vegetacao_fazenda: number;
-  culturas: string[];
-}
-
-export interface ICultura {
-  id: string;
-  nome: string;
+  culturas: ICultura[];
 }

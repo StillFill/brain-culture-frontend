@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import InfoCard from "./Components/InfoCard/InfoCard";
 import { PieChart, Pie, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import "./index.scss";
+import "./Dashboard.scss";
 import {
-  GraphByEstado,
   getFazendasQuantity,
   getGraphByCultura,
   getGraphByEstado,
@@ -47,7 +46,7 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
-      <h1>Dashboard</h1>
+      <h1 id="dashboard">Dashboard</h1>
       <div className="big-numbers-header">
         <InfoCard title="Quantidade total de fazendas" loading={!totalFazendas}>
           <div>

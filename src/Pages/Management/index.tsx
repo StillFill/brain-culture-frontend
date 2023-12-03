@@ -7,11 +7,12 @@ import {
 import {
   IProdutor,
   addProdutor,
+  deleteProdutor,
   getProdutores,
   updateProdutor,
 } from "../../Services/ProdutoresService";
 import Modal from "react-bootstrap/Modal";
-import ProdutorForm from "./ProdutorForm/ProdutorForm";
+import ProdutorForm, { IProdutorForm } from "./ProdutorForm/ProdutorForm";
 import "../../Components/styleButtons.scss";
 
 const Management = () => {
@@ -104,7 +105,7 @@ const Management = () => {
   }, []);
 
   const submitForm = useCallback(
-    async (produtor: IProdutor, isUpdate: boolean) => {
+    async (produtor: IProdutorForm, isUpdate: boolean) => {
       const isEditingProdutor = isUpdate && !!selectedProdutor;
 
       if (isEditingProdutor) {
@@ -121,12 +122,27 @@ const Management = () => {
     [isEditing, selectedProdutor]
   );
 
+  const deleteSelectedProdutor = useCallback(async () => {
+    if (!selectedProdutor) return;
+
+    await deleteProdutor(selectedProdutor.documento);
+
+    setSelectedProdutor(null);
+    setIsEditing(false);
+
+    loadProdutores();
+  }, [selectedProdutor]);
+
   return (
     <>
       <div className="management">
         <h1>Gerenciamento</h1>
         <div className="management-headers-button">
-          <button className="green-button" onClick={() => setIsEditing(true)}>
+          <button
+            id="new-produtor-form"
+            className="green-button"
+            onClick={() => setIsEditing(true)}
+          >
             Adicionar produtor
           </button>
         </div>
@@ -151,6 +167,7 @@ const Management = () => {
               setIsEditing(a);
             }}
             submitForm={submitForm}
+            deleteProdutor={deleteSelectedProdutor}
           ></ProdutorForm>
         </Modal.Body>
       </Modal>

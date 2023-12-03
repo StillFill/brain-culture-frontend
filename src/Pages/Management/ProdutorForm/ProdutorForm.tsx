@@ -4,21 +4,35 @@ import { IProdutor } from "../../../Services/ProdutoresService";
 import Form from "react-bootstrap/Form";
 import "../../../Components/styleButtons.scss";
 import ReactLoading from "react-loading";
+import ReactSelect, { Options } from "react-select";
+import { ICultura, getAllCulturas } from "../../../Services/CulturasService";
+import { cpf, cnpj } from "cpf-cnpj-validator";
 
-const buildDataToForm = (produtor: IProdutor) => ({
-  area_agricultavel_fazenda: produtor.area_agricultavel_fazenda,
-  area_total_fazenda: produtor.area_total_fazenda,
-  area_vegetacao_fazenda: produtor.area_vegetacao_fazenda,
-  cidade: produtor.cidade,
-  documento: produtor.documento,
-  estado: produtor.estado,
-  nome: produtor.nome,
-  nome_fazenda: produtor.nome_fazenda,
-  culturas: produtor.culturas,
-});
+const buildDataToForm = (produtor: IProdutor): IProdutorForm => {
+  const culturas = produtor.culturas || [];
+  return {
+    area_agricultavel_fazenda: produtor.area_agricultavel_fazenda,
+    area_total_fazenda: produtor.area_total_fazenda,
+    area_vegetacao_fazenda: produtor.area_vegetacao_fazenda,
+    cidade: produtor.cidade,
+    documento: produtor.documento,
+    estado: produtor.estado,
+    nome: produtor.nome,
+    nome_fazenda: produtor.nome_fazenda,
+    culturas: culturas,
+    culturas_selection: culturas.map((a) => ({ label: a.nome, value: a.id })),
+  };
+};
 
-const ProdutorForm = (props: IProdutorForm) => {
-  const [produtorForm, setProdutorForm] = useState<IProdutor>({
+const formatToOptions = (culturas: ICultura[]): any => {
+  return culturas.map((cult) => ({
+    label: cult.nome,
+    value: cult.id,
+  }));
+};
+
+const ProdutorForm = (props: IProdutorFormProps) => {
+  const [produtorForm, setProdutorForm] = useState<IProdutorForm>({
     area_agricultavel_fazenda: 0,
     area_total_fazenda: 0,
     area_vegetacao_fazenda: 0,
@@ -28,12 +42,23 @@ const ProdutorForm = (props: IProdutorForm) => {
     nome: "",
     nome_fazenda: "",
     culturas: [],
+    culturas_selection: [],
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [culturas, setCulturas] = useState([]);
+  const [fieldErrors, setFieldErrors] = useState<FieldError>({});
 
   useEffect(() => {
     if (props.produtor) setProdutorForm(buildDataToForm(props.produtor));
+
+    const loadData = async () => {
+      const culturas = await getAllCulturas();
+
+      setCulturas(formatToOptions(culturas));
+    };
+
+    loadData();
   }, []);
 
   const handleChange = useCallback(
@@ -48,8 +73,75 @@ const ProdutorForm = (props: IProdutorForm) => {
     [produtorForm]
   );
 
+  const handleChangeMultiSelection = useCallback(
+    (value: any, name: keyof IProdutorForm) => {
+      const valueOfKey = produtorForm[name];
+
+      if (!Array.isArray(valueOfKey)) return;
+
+      setProdutorForm({
+        ...produtorForm,
+        [name]: value,
+      });
+
+      console.log(produtorForm);
+    },
+    [produtorForm]
+  );
+
+  const validateForm = (produtorForm: IProdutorForm) => {
+    const fieldToValidate: ValidationForm = {
+      documento: {
+        validate: (produtorForm: IProdutorForm) =>
+          cpf.isValid(produtorForm.documento) ||
+          cnpj.isValid(produtorForm.documento),
+        message: "Documento inválido",
+      },
+      area_total_fazenda: {
+        validate: (produtorForm: IProdutorForm) =>
+          produtorForm.area_agricultavel_fazenda +
+            produtorForm.area_vegetacao_fazenda <=
+          produtorForm.area_total_fazenda,
+        message:
+          "A area com vegetação e agricultável juntas está maior que a área total da fazenda",
+      },
+    };
+
+    let fields: FieldError = {};
+
+    Object.keys(fieldToValidate).map((a) => {
+      const field = a as keyof ValidationForm;
+      const i = fieldToValidate[field];
+
+      if (!i) {
+        return {
+          errorMessage: "",
+          field: "culturas_selection",
+          isValid: false,
+        };
+      }
+
+      fields[field] = {
+        errorMessage: i.message,
+        isValid: i.validate(produtorForm),
+      };
+    });
+
+    setFieldErrors(fields);
+
+    const invalidFields = (Object.keys(fields) as (keyof typeof fields)[]).find(
+      (key) => {
+        return !fields[key]?.isValid;
+      }
+    );
+
+    return !invalidFields || invalidFields.length === 0;
+  };
+
   const onSubmitForm = useCallback(async () => {
     try {
+      if (!validateForm(produtorForm)) return;
+
       setIsLoading(true);
       console.log(produtorForm);
       await props.submitForm(produtorForm, !!props.produtor);
@@ -65,6 +157,16 @@ const ProdutorForm = (props: IProdutorForm) => {
       <div className="header-buttons">
         {!props.isEditing && (
           <button
+            id="delete-button"
+            className="red-button"
+            onClick={() => props.deleteProdutor()}
+          >
+            Excluir
+          </button>
+        )}
+        {!props.isEditing && (
+          <button
+            id="edit-button"
             className="blue-button"
             onClick={() => props.setIsEditing(true)}
           >
@@ -95,7 +197,13 @@ const ProdutorForm = (props: IProdutorForm) => {
             name="documento"
             onChange={handleChange}
             value={produtorForm.documento}
+            maxLength={14}
           />
+          {fieldErrors.documento && !fieldErrors.documento.isValid && (
+            <p className="error-message">
+              {fieldErrors.documento.errorMessage}
+            </p>
+          )}
         </div>
       </div>
 
@@ -111,6 +219,23 @@ const ProdutorForm = (props: IProdutorForm) => {
               name="nome_fazenda"
               onChange={handleChange}
               value={produtorForm.nome_fazenda}
+            />
+          </div>
+
+          <div className="input-form-container">
+            <Form.Label>Cultura</Form.Label>
+            <ReactSelect
+              isDisabled={!props.isEditing}
+              // type="text"
+              id="culturas_selection"
+              name="culturas_selection"
+              onChange={(evt) =>
+                handleChangeMultiSelection(evt, "culturas_selection")
+              }
+              value={produtorForm.culturas_selection}
+              options={culturas}
+              isMulti
+              placeholder="Selecione uma cultura"
             />
           </div>
         </div>
@@ -152,6 +277,12 @@ const ProdutorForm = (props: IProdutorForm) => {
               onChange={handleChange}
               value={produtorForm.area_total_fazenda}
             />
+            {fieldErrors.area_total_fazenda &&
+              !fieldErrors.area_total_fazenda.isValid && (
+                <p className="error-message">
+                  {fieldErrors.area_total_fazenda.errorMessage}
+                </p>
+              )}
           </div>
 
           <div className="input-form-container">
@@ -192,6 +323,7 @@ const ProdutorForm = (props: IProdutorForm) => {
         {props.isEditing && (
           <button
             className="green-button produtor-form-submit-button"
+            id="submit-button"
             onClick={onSubmitForm}
           >
             {isLoading ? (
@@ -206,11 +338,30 @@ const ProdutorForm = (props: IProdutorForm) => {
   );
 };
 
-interface IProdutorForm {
+interface IProdutorFormProps {
   produtor?: IProdutor;
   isEditing: boolean;
   setIsEditing: (value: boolean) => any;
-  submitForm: (produtor: IProdutor, isUpdate: boolean) => Promise<void>;
+  submitForm: (produtor: IProdutorForm, isUpdate: boolean) => Promise<void>;
+  deleteProdutor: () => {};
+}
+
+type FieldError = {
+  [key in keyof IProdutorForm]?: {
+    isValid: boolean;
+    errorMessage: string;
+  };
+};
+
+type ValidationForm = {
+  [key in keyof IProdutorForm]?: {
+    validate: (produtorForm: IProdutorForm) => boolean;
+    message: string;
+  };
+};
+
+export interface IProdutorForm extends IProdutor {
+  culturas_selection: { label: string; value: number }[];
 }
 
 export default ProdutorForm;
