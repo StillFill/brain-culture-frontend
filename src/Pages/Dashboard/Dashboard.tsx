@@ -13,6 +13,10 @@ import {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const formatToChatData = (graphData: any[], nameKey: string): IGraph[] => {
+  const totalAmount = graphData.reduce((a, b) => a + b.percentage, 0);
+
+  if (totalAmount === 0) return [];
+
   return graphData.map((g) => ({
     name: g[nameKey],
     value: g.percentage,
@@ -48,60 +52,80 @@ const Dashboard = () => {
     <div className="dashboard">
       <h1 id="dashboard">Dashboard</h1>
       <div className="big-numbers-header">
-        <InfoCard title="Quantidade total de fazendas" loading={!totalFazendas}>
+        <InfoCard
+          title="Quantidade total de fazendas"
+          loading={totalFazendas === undefined}
+        >
           <div>
-            <h3>{totalFazendas}</h3>
+            <h3>{totalFazendas || 0}</h3>
           </div>
         </InfoCard>
 
         <InfoCard
           title="Hectares total de fazendas"
-          loading={!totalHectaresFazenda}
+          loading={totalHectaresFazenda === undefined}
         >
           <div>
-            <h3>{totalHectaresFazenda}</h3>
+            <h3>{totalHectaresFazenda || 0}</h3>
           </div>
         </InfoCard>
       </div>
 
       <div className="graph-container">
         <InfoCard title="Fazendas por estado" loading={!graphEstado}>
-          <ResponsiveContainer height={300} width="100%">
-            <PieChart>
-              <Pie data={graphEstado} dataKey="value" label={renderLabel}>
-                {graphEstado?.map((_, index) => (
-                  <Cell fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          {graphEstado && graphEstado.length > 0 && (
+            <ResponsiveContainer height={300} width="100%">
+              <PieChart>
+                <Pie data={graphEstado} dataKey="value" label={renderLabel}>
+                  {graphEstado?.map((_, index) => (
+                    <Cell fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+
+          {graphEstado?.length === 0 && (
+            <h3 className="no-info-message">Ainda não tem informações</h3>
+          )}
         </InfoCard>
 
         <InfoCard title="Culturas" loading={!graphCultura}>
-          <ResponsiveContainer height={300} width="100%">
-            <PieChart>
-              <Pie data={graphCultura} dataKey="value" label={renderLabel}>
-                {graphEstado?.map((_, index) => (
-                  <Cell fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          {graphCultura && graphCultura.length > 0 && (
+            <ResponsiveContainer height={300} width="100%">
+              <PieChart>
+                <Pie data={graphCultura} dataKey="value" label={renderLabel}>
+                  {graphEstado?.map((_, index) => (
+                    <Cell fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+          {graphCultura?.length === 0 && (
+            <h3 className="no-info-message">Ainda não tem informações</h3>
+          )}
         </InfoCard>
 
-        <InfoCard title="Uso de solo" loading={!graphCultura}>
-          <ResponsiveContainer height={300} width="100%">
-            <PieChart>
-              <Pie data={graphSolo} dataKey="value" label={renderLabel}>
-                {graphEstado?.map((_, index) => (
-                  <Cell fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+        <InfoCard title="Uso de solo" loading={!graphSolo}>
+          {graphSolo && graphSolo.length > 0 && (
+            <ResponsiveContainer height={300} width="100%">
+              <PieChart>
+                <Pie data={graphSolo} dataKey="value" label={renderLabel}>
+                  {graphEstado?.map((_, index) => (
+                    <Cell fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+
+          {graphSolo && graphSolo.length === 0 && (
+            <h3 className="no-info-message">Ainda não tem informações</h3>
+          )}
         </InfoCard>
       </div>
     </div>

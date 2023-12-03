@@ -50,6 +50,7 @@ const ProdutorForm = (props: IProdutorFormProps) => {
   const [fieldErrors, setFieldErrors] = useState<FieldError>({});
 
   useEffect(() => {
+    console.log(props.produtor);
     if (props.produtor) setProdutorForm(buildDataToForm(props.produtor));
 
     const loadData = async () => {
@@ -83,8 +84,6 @@ const ProdutorForm = (props: IProdutorFormProps) => {
         ...produtorForm,
         [name]: value,
       });
-
-      console.log(produtorForm);
     },
     [produtorForm]
   );
@@ -200,7 +199,7 @@ const ProdutorForm = (props: IProdutorFormProps) => {
             maxLength={14}
           />
           {fieldErrors.documento && !fieldErrors.documento.isValid && (
-            <p className="error-message">
+            <p className="error-message" id="documento-error-message">
               {fieldErrors.documento.errorMessage}
             </p>
           )}
@@ -279,7 +278,7 @@ const ProdutorForm = (props: IProdutorFormProps) => {
             />
             {fieldErrors.area_total_fazenda &&
               !fieldErrors.area_total_fazenda.isValid && (
-                <p className="error-message">
+                <p className="error-message" id="area-total-error-message">
                   {fieldErrors.area_total_fazenda.errorMessage}
                 </p>
               )}
